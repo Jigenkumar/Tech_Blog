@@ -1,0 +1,19 @@
+{
+    "params":
+    {
+        "Local_server":"True",
+        "Local_url":"mysql+pymysql://root:@localhost/tech blog",
+        "Prod_url":"mysql+pymysql://root:@localhost/tech blog",
+        "Web_name":"Tech_Blog",
+        "FB_account":"https://facebook.com/tech_blog",
+        "TW_account":"https://twitter.com/tech_blog",
+        "GH_account":"https://github.com/tech_blog",
+        "gmail-user":"jaspatel690@gmail.com",
+        "gmail-password":"jas@sa@123",
+        "login_image":"TB.jpg",
+        "user_name":"jkumar",
+        "user_pass":"jas19900",
+        "upload_file": "C:\\Users\\Vivek\\Desktop\\python\\Flask\\static\\img"
+
+    }
+}

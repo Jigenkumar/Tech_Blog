@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- Page Header-->
+<header class="masthead"
+    style="background-image: url('   {{ url_for('static', filename='assets/img/home-bg.jpg') }}   ')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1>Admin Panel</h1>
+                    <span class="subheading">Change blog as per requirement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<style>
+    
+</style>
+<div class="container my-5">
+<h1> For add a new Blog click here... </h1>
+<a href="/addr" ><button type="button" class="btn btn-outline-dark btn-sm">Edit</button></a>
+<a href="/logout" ><button type="button" class="btn btn-outline-dark btn-sm">Logout</button></a>
+  <hr>  
+  <table class="table"   >
+      <thead>
+              <tr>
+                  <th scope="col">SrNo.</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Edit</th>
+                  <th scope="col">Delete</th>
+              </tr>
+          </thead>
+          <tbody>
+          {% for post in post %}
+          <tr>
+            <th scope="row">{{loop.index}}</th>
+              <td>{{post.title}}</td>
+              <td>{{post.date}}</td>
+              <td><a href="/edit/{{post.sno}}" ><button type="button" class="btn btn-outline-dark btn-sm">Edit</button></a></td>
+              <td><a href="/delete/{{post.sno}}" ><button type="button" class="btn btn-outline-dark btn-sm">Delete</button></a></td>
+          </tr>
+          {% endfor %}
+          
+
+      </tbody>
+  </table>
+</div>
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+          
+        </div>
+    </div>               
+</div>
+
+{% endblock %}
