@@ -11,6 +11,7 @@ with open('config.json', 'r') as c:
 
 local_server = True
 app = Flask(__name__)
+app.secret_key = 'super-secret-key'
 app.config.update(
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = '465',
@@ -28,7 +29,7 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 app.config['UPLOAD_FOLDER'] = params['upload_file']
-app.secret_key = 'super-secret-key'
+
 
 class Contacts(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
@@ -57,33 +58,35 @@ def home():
 def about():
     return render_template('about.html',params=params)
 
-@app.route("/dashboard", methods = ['GET','POST'])
-def dashboard():
-    if "user" in session and session['user'] == params['user_name']:
-        post = blog.query.all()
-        return render_template("dashboard.html", params=params, post=post)
-
-    elif request.method=='POST':
+@app.route("/login", methods = ['GET','POST'])
+def login():
+    if request.method=='POST':
         user_name = request.form.get('uname')
         user_pass = request.form.get('pass')
-
-        if (user_name == params['user_name'] and user_pass == params['user_pass']):
-            post = blog.query.all()
-            return render_template('dashboard.html',params=params, post=post)
-        else:
-            return render_template('login.html',params=params)
-    
+        session['user_name'] = user_name
+        session['user_pass'] = user_pass
+        return redirect('/dashboard')
     else:
         return render_template('login.html',params=params)
+
+@app.route("/dashboard")
+def dashboard():
+    if "user_name" in session and (session['user_name'] == params['user_name'], session['user_pass'] == params['user_pass']):
+        post = blog.query.all()
+        return render_template("dashboard.html", params=params, post=post)
+    
+    else:
+        return redirect('/login')
         
 @app.route("/uploader" , methods=['GET', 'POST'])
 def uploader():
-    if "user" in session and session['user']==params['user_name']:
+    if "user_name" in session and (session['user_name'] == params['user_name'], session['user_pass'] == params['user_pass']):
         if request.method=='POST':
             f = request.files['file1']
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
             return "Uploaded successfully!"
-    
+    else:
+        return redirect('/login')   
 
 @app.route("/contact", methods = ['GET','POST'])
 def contact():
@@ -109,23 +112,26 @@ def post(blog_slug):
 
 @app.route("/add", methods = ['GET','POST'])
 def add():
-    if(request.method=='POST'):
-        Title = request.form.get('title')
-        Sub_heading = request.form.get('sub heading')
-        Slug = request.form.get('slug')
-        Content = request.form.get('content')
-        Img_file = request.form.get('img_file')
-        Name = request.form.get('name')
-        Date = datetime.now()
-        entry = blog(title=Title, sub_heading=Sub_heading, slug=Slug, content=Content, img_file=Img_file, name=Name, date=Date)
-        db.session.add(entry)
-        db.session.commit()
-    
-    return render_template('add.html',params=params)
-
+    if "user_name" in session and (session['user_name'] == params['user_name'], session['user_pass'] == params['user_pass']):
+        if(request.method=='POST'):
+            Title = request.form.get('title')
+            Sub_heading = request.form.get('sub heading')
+            Slug = request.form.get('slug')
+            Content = request.form.get('content')
+            Img_file = request.form.get('img_file')
+            Name = request.form.get('name')
+            Date = datetime.now()
+            entry = blog(title=Title, sub_heading=Sub_heading, slug=Slug, content=Content, img_file=Img_file, name=Name, date=Date)
+            db.session.add(entry)
+            db.session.commit()
+            return redirect('/dashboard')
+        return render_template('add.html',params=params)
+    else:
+        return render_template('login.html',params=params)
 
 @app.route("/edit/<string:sno>", methods=['GET', 'POST'])
 def edit(sno):
+    if "user_name" in session and (session['user_name'] == params['user_name'], session['user_pass'] == params['user_pass']):
     
         if(request.method=='POST'):
             title = request.form.get('title')
@@ -148,6 +154,8 @@ def edit(sno):
             return redirect('/edit/'+sno)
         post = blog.query.filter_by(sno=sno).first()
         return render_template('edit.html', params=params, post=post)
+    else:
+        return render_template('login.html', params=params)
 
 @app.route("/delete/<string:sno>", methods=['GET', 'POST'])
 def delete(sno):
@@ -157,12 +165,11 @@ def delete(sno):
     db.session.commit()
     return redirect("/dashboard")
 
-
 @app.route("/logout")
 def logout():
-    if "user" in session and session['user'] == params['user_name']:
-        session.pop('user')
-    return redirect('/dashboard')
+    if "user_name" in session and session['user_name']==params['user_name']:
+        session.pop('user_name')
+    return redirect('/login')
  
       
 app.run(debug=True)
